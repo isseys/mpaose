@@ -50,26 +50,41 @@ const fetchEmployments = () => {
 <template>
   <main class="container m-auto w-full mt-4 p-2 bg-slate-300">
     <div class="mt-2 rounded-lg">
-      <h1 class="font-bold text-xl text-gray-500">Employments</h1>
-      <p class="text-gray-400">A list of all the employments for the individual including name, employer, start and end date</p>
+      <div class="flex justify-between">
+        <div>
+          <h1 class="font-bold text-xl text-gray-500">Employments</h1>
+          <p class="text-gray-400">A list of all the employments for the individual including name, employer, start and end date</p>
+
+        </div>
+
+        <div>
+          <form class="flex py-6">
+            <a href="/logout"
+                    class=" shadow-lg ml-4 text-white bg-slate-400 hover:bg-slate-600 focus:ring-4 focus:outline-none focus:ring-slate-300 font-small rounded-xl text-sm px-4 py-2">
+              Logout
+            </a>
+          </form>
+        </div>
+
+      </div>
       <div class="flex justify-between items-center ">
 
         <div class="w-2/4">
-          <form class="flex py-6">
+          <div class="flex py-6">
             <input v-model="searchstring" type="search" id="search" class=" shadow-lg border w-full border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block p-2"
                    placeholder="Search" required>
             <button 
-                    class=" shadow-lg ml-4 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                    class=" shadow-lg ml-4 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2">
               Search
             </button>
-          </form>
+          </div>
   
         </div>
   
         <div>
   
           <button @click.prevent="downloadCSV"
-                    class=" shadow-lg ml-4 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                    class=" shadow-lg ml-4 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2">
               Downlod CSV
             </button>
         </div>
