@@ -1,22 +1,26 @@
 <script setup>
 import axios from "axios";
 import {ref, onMounted, computed} from "vue"
+import Logout from "./Logout.vue";
 
 const employments = ref([]);
 let searchstring = ref('');
+let filterby = ref('');
+let errormessage = ref('');
 
 const c_employments = computed(() => {
-  if(searchstring.value == ""){
+  if(filterby.value == ""){
     return employments.value.filter((n) => n)
   }
-  return employments.value.filter((n) => n['employer_name'].includes(searchstring.value))
+  return employments.value.filter((n) => n['employer_name'].includes(filterby.value))
 })
 
 const downloadCSV = () => {
-  let csv = 'Id,Emplyer Name,Member Name,Start Date, End Date\n';
+  let csv = 'Id,Emplyer Name,Member Name, NIC No.,Start Date, End Date\n';
       c_employments.value.forEach((row) => {
         for(let key in row){
           csv += row[key];
+          csv += ',';
         }
         csv += "\n";
       });
@@ -27,23 +31,24 @@ const downloadCSV = () => {
       anchor.click();
 }
 
-onMounted(() =>{
-  axios.get('https://housing-api.stag.mpao.mv/employments/m000001/a', { headers: {'Authorization': 'Bearer ' + localStorage.getItem('accessToken')}
-    
+const search = () => {
+  filterby.value = '';
+  errormessage.value = '';
+  let url = "https://housing-api.stag.mpao.mv/employments/"+searchstring.value+"/a";
+  axios.get(url, {
+    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('accessToken') }
+
   }).then(response => {
     console.log(response.data)
     employments.value = response.data;
-  })
-})
-
-const fetchEmployments = () => {
-  axios.get('https://housing-api.stag.mpao.mv/employments/m000001/a', { headers: {'Authorization': 'Bearer ' + localStorage.getItem('accessToken')}
-    
-  }).then(response => {
-    console.log(response.data)
-    return response.data;
-  })
+  }).catch((e)=>{
+    console.log(e.response.data.statusCode);
+    employments.value = [];
+    errormessage.value = e.response.data.message;
+  });
 }
+
+
 
 </script>
 
@@ -70,15 +75,27 @@ const fetchEmployments = () => {
       <div class="flex justify-between items-center ">
 
         <div class="w-2/4">
-          <div class="flex py-6">
-            <input v-model="searchstring" type="search" id="search" class=" shadow-lg border w-full border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block p-2"
-                   placeholder="Search" required>
-            <button 
-                    class=" shadow-lg ml-4 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2">
-              Search
-            </button>
-          </div>
+          <form>
+              <div class="flex py-6">
+
+                <input v-model="searchstring" type="search" id="search" class=" shadow-lg border w-full border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block p-2"
+                placeholder="Search" required>
+                <button @click.prevent="search"
+                        class=" shadow-lg ml-4 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2">
+                  Search
+                </button>
+              </div>
+            </form>
   
+        </div>
+
+        <div class="w-1/4">
+          <div class="flex py-6">
+            <input v-model="filterby" type="search" id="filter"
+              class=" shadow-lg border w-full border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block p-2"
+              placeholder="Filter by company" required>
+          </div>
+        
         </div>
   
         <div>
@@ -94,45 +111,60 @@ const fetchEmployments = () => {
     <div class="shadow-lg overflow-x-auto relative border rounded-lg overflow-hidden border-slate-300">
       <table class="text-left rounded-xl w-full">
         <thead class="bg-gray-50 text-gray-700">
-        <tr>
-          <th scope="col" class="py-3 px-6 border border-slate-300 font-bold">
-            ID
-          </th>
-          <th scope="col" class="py-3 px-6 border border-slate-300 font-bold">
-            Full Name
-          </th>
-          <th scope="col" class="py-3 px-6 border border-slate-300 font-bold">
-            Employer Name
-          </th>
-          <th scope="col" class="py-3 px-6 border border-slate-300 font-bold">
-            Start Date
-          </th>
-          <th scope="col" class="py-3 px-6 border border-slate-300 font-bold">
-            End Date
-          </th>
-        </tr>
+          <tr>
+            <th scope="col" class="py-3 px-6 border border-slate-300 font-bold">
+              ID
+            </th>
+            <th scope="col" class="py-3 px-6 border border-slate-300 font-bold">
+              Full Name
+            </th>
+            <th scope="col" class="py-3 px-6 border border-slate-300 font-bold">
+              Employer Name
+            </th>
+            <th scope="col" class="py-3 px-6 border border-slate-300 font-bold">
+              Start Date
+            </th>
+            <th scope="col" class="py-3 px-6 border border-slate-300 font-bold">
+              End Date
+            </th>
+          </tr>
         </thead>
         <tbody>
-        <tr class="bg-white border-b text-gray-700" v-for="e in c_employments">
-          <th scope="row"
-              class="py-3 px-6 font-medium border border-slate-300">
-            {{ e.id }}
-          </th>
-          <td class="py-3 px-6 border border-slate-300">
-            {{ e.employer_name }}
-          </td>
-          <td class="py-3 px-6 border border-slate-300">
-            {{ e.member_name }}
-          </td>
-          <td class="py-3 px-6 border border-slate-300">
-            {{ new Date(e.start_date).toLocaleDateString('en-US') }}
-          </td>
-          <td class="py-3 px-6 border border-slate-300">
-            {{ new Date(e.end_date).toLocaleDateString('en-US') }}
-          </td>
-        </tr>
+          <tr class="bg-white border-b text-gray-700" v-for="e in c_employments">
+            <th scope="row"
+                class="py-3 px-6 font-medium border border-slate-300">
+              {{ e.id }}
+            </th>
+            <td class="py-3 px-6 border border-slate-300">
+              {{ e.member_name }}
+            </td>
+            <td class="py-3 px-6 border border-slate-300">
+              {{ e.employer_name }}
+            </td>
+            <td class="py-3 px-6 border border-slate-300">
+              {{ new Date(e.start_date).toLocaleDateString('en-US') }}
+            </td>
+            <td class="py-3 px-6 border border-slate-300">
+              {{ new Date(e.end_date).toLocaleDateString('en-US') }}
+            </td>
+          </tr>
         </tbody>
       </table>
+        <div class="w-full flex">
+          <div class="mx-auto" v-if="errormessage">
+            <p class="text-red-300">
+              <span>{{errormessage}}. </span>
+              <br/>
+
+              <span> Please search by correct NID No.</span>
+              <span> Also make sure filter string is correct.</span>
+
+
+            </p>
+          </div>
+
+        </div>
+
     </div>
 
   </main>
