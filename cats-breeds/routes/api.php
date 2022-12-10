@@ -21,9 +21,30 @@ use \App\Http\Controllers\TypeController;
 |
 */
 
-Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
-    return $request->user();
-});
+// Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
+//     return $request->user();
+// });
+
+Route::patch('/cats/{id}', [CatController::class, 'update']);
+Route::delete('/cats/{id}', [CatController::class, 'destroy']);
+
+Route::patch('/breeds/{id}', [BreedController::class, 'update']);
+Route::delete('/breeds/{id}', [BreedController::class, 'destroy']);
+
+Route::patch('/bodies/{id}', [BodyController::class, 'update']);
+Route::delete('/bodies/{id}', [BodyController::class, 'destroy']);
+
+Route::patch('/coats/{id}', [CoatController::class, 'update']);
+Route::delete('/coats/{id}', [CoatController::class, 'destroy']);
+
+Route::patch('/origins/{id}', [OriginController::class, 'update']);
+Route::delete('/origins/{id}', [OriginController::class, 'destroy']);
+
+Route::patch('/types/{id}', [TypeController::class, 'update']);
+Route::delete('/types/{id}', [TypeController::class, 'destroy']);
+
+Route::patch('/patterns/{id}', [PatternController::class, 'update']);
+Route::delete('/patterns/{id}', [PatternController::class, 'destroy']);
 
 Route::get('/search/cat', [CatController::class, 'search'])->name('searchcats');
 
@@ -52,7 +73,7 @@ Route::get('/types/{type}', [TypeController::class, 'show']);
 Route::get('/patterns/{pattern}', [PatternController::class, 'show']);
 
 // Createing records
-Route::post('/create/cat', [CatController::class, 'create'])->name('cat-create');
+Route::post('/create/cat', [CatController::class, 'store'])->name('cat-store');
 Route::post('/create/body', [BodyController::class, 'create'])->name('body-create');
 Route::post('/create/breed', [BreedController::class, 'create'])->name('breed-create');
 Route::post('/create/coat', [CoatController::class, 'create'])->name('coat-create');

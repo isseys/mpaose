@@ -77,9 +77,19 @@ class OriginController extends Controller
      * @param  \App\Models\Origin  $origin
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateOriginRequest $request, Origin $origin)
+    public function update(Request $request, $id)
     {
-        //
+        $origin = Origin::find($id);
+        
+        if(!$origin){
+            return abort(403, "Record not found!!");
+        }
+
+        $validated = $request->validate([
+            'name'=> 'required|string|min:3|unique:origins,name,'.$origin->id
+        ]);
+
+        return $origin->update($validated);
     }
 
     /**
@@ -88,8 +98,18 @@ class OriginController extends Controller
      * @param  \App\Models\Origin  $origin
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Origin $origin)
+    public function destroy($id)
     {
-        //
+        $origin = Origin::find($id);
+        
+        if(!$origin){
+            return abort(403, "Record not found!!");
+        }
+
+        if($origin->cats()->exists()){
+            return abort(403, "Can not delete! There are cats with this category!");
+        }
+
+        return $origin->delete();
     }
 }

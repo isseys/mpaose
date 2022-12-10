@@ -77,9 +77,19 @@ class CoatController extends Controller
      * @param  \App\Models\Coat  $coat
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateCoatRequest $request, Coat $coat)
+    public function update(Request $request, $id)
     {
-        //
+        $coat = Coat::find($id);
+        
+        if(!$coat){
+            return abort(403, "Record not found!!");
+        }
+
+        $validated = $request->validate([
+            'name'=> 'required|string|min:3|unique:coats,name,'.$coat->id
+        ]);
+
+        return $coat->update($validated);
     }
 
     /**
@@ -88,8 +98,18 @@ class CoatController extends Controller
      * @param  \App\Models\Coat  $coat
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Coat $coat)
+    public function destroy($id)
     {
-        //
+        $coat = Coat::find($id);
+        
+        if(!$coat){
+            return abort(403, "Record not found!!");
+        }
+
+        if($coat->cats()->exists()){
+            return abort(403, "Can not delete! There are cats with this category!");
+        }
+
+        return $coat->delete();
     }
 }

@@ -77,9 +77,19 @@ class BreedController extends Controller
      * @param  \App\Models\Breed  $breed
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateBreedRequest $request, Breed $breed)
+    public function update(Request $request, $id)
     {
-        //
+        $breed = Breed::find($id);
+        
+        if(!$breed){
+            return abort(403, "Record not found!!");
+        }
+
+        $validated = $request->validate([
+            'name'=> 'required|string|min:3|unique:breeds,name,'.$breed->id
+        ]);
+
+        return $breed->update($validated);
     }
 
     /**
@@ -88,8 +98,18 @@ class BreedController extends Controller
      * @param  \App\Models\Breed  $breed
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Breed $breed)
+    public function destroy($id)
     {
-        //
+        $breed = Breed::find($id);
+        
+        if(!$breed){
+            return abort(403, "Record not found!!");
+        }
+
+        if($breed->cats()->exists()){
+            return abort(403, "Can not delete! There are cats with this category!");
+        }
+
+        return $breed->delete();
     }
 }

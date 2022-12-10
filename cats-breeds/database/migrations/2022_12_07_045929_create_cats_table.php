@@ -17,12 +17,14 @@ return new class extends Migration
             $table->id();
             $table->string('image');
             $table->text('description');
-            $table->foreignId('body_id')->constrainded();
-            $table->foreignId('breed_id')->constrainded();
-            $table->foreignId('coat_id')->constrainded();
-            $table->foreignId('origin_id')->constrainded();
-            $table->foreignId('pattern_id')->constrainded();
-            $table->foreignId('type_id')->constrainded();
+            $table->foreignId('body_id')->constrained()->restrictOnDelete();
+            $table->foreignId('breed_id')->constrained()->restrictOnDelete();
+            $table->foreignId('coat_id')->constrained()->restrictOnDelete();
+            $table->foreignId('origin_id')->constrained()->restrictOnDelete();
+            $table->foreignId('pattern_id')->constrained()->restrictOnDelete();
+            $table->foreignId('type_id')->constrained()->restrictOnDelete();
+
+            $table->unique(['body_id', 'breed_id','coat_id', 'origin_id', 'pattern_id', 'type_id'], 'category_index');
 
             $table->timestamps();
         });

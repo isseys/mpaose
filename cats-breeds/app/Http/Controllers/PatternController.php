@@ -77,9 +77,19 @@ class PatternController extends Controller
      * @param  \App\Models\Pattern  $pattern
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdatePatternRequest $request, Pattern $pattern)
+    public function update(Request $request, $id)
     {
-        //
+        $pattern = Pattern::find($id);
+        
+        if(!$pattern){
+            return abort(403, "Record not found!!");
+        }
+
+        $validated = $request->validate([
+            'name'=> 'required|string|min:3|unique:patterns,name,'.$pattern->id
+        ]);
+
+        return $pattern->update($validated);
     }
 
     /**
@@ -88,8 +98,18 @@ class PatternController extends Controller
      * @param  \App\Models\Pattern  $pattern
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Pattern $pattern)
+    public function destroy($id)
     {
-        //
+        $pattern = Pattern::find($id);
+        
+        if(!$pattern){
+            return abort(403, "Record not found!!");
+        }
+
+        if($pattern->cats()->exists()){
+            return abort(403, "Can not delete! There are cats with this category!");
+        }
+
+        return $pattern->delete();
     }
 }

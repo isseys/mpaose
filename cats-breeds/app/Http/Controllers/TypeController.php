@@ -78,9 +78,19 @@ class TypeController extends Controller
      * @param  \App\Models\Type  $type
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateTypeRequest $request, Type $type)
+    public function update(Request $request, $id)
     {
-        //
+        $type = Type::find($id);
+        
+        if(!$type){
+            return abort(403, "Record not found!!");
+        }
+
+        $validated = $request->validate([
+            'name'=> 'required|string|min:3|unique:types,name,'.$type->id
+        ]);
+
+        return $type->update($validated);
     }
 
     /**
@@ -89,8 +99,18 @@ class TypeController extends Controller
      * @param  \App\Models\Type  $type
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Type $type)
+    public function destroy($id)
     {
-        //
+        $type = Type::find($id);
+        
+        if(!$type){
+            return abort(403, "Record not found!!");
+        }
+
+        if($posts->cats()->exists()){
+            return abort(403, "Can not delete! There are cats with this category!");
+        }
+
+        return $type->delete();
     }
 }

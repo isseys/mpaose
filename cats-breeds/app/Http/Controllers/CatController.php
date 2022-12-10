@@ -13,6 +13,8 @@ use App\Models\Origin;
 use App\Models\Type;
 use Illuminate\Http\Request;
 
+use Illuminate\Support\Arr;
+
 
 class CatController extends Controller
 {
@@ -159,32 +161,6 @@ class CatController extends Controller
              'type:name,id',
             ])->get();
     }
-
-
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create(Request $request)
-    {
-        $validated = $request->validate([
-            'image'=> 'required|string|min:3',
-            'description'=> 'required|string|min:3',
-            'body_id'=> 'required|numeric',
-            'breed_id'=> 'required|numeric',
-            'coat_id'=> 'required|numeric',
-            'origin_id'=> 'required|numeric',
-            'pattern_id'=> 'required|numeric',
-            'type_id'=> 'required|numeric',
-        ]);
-
-
-        $cat = Cat::create($validated);
-        return $cat;
-    }
-
     /**
      * Store a newly created resource in storage.
      *
@@ -203,6 +179,14 @@ class CatController extends Controller
             'pattern_id'=> 'required|numeric',
             'type_id'=> 'required|numeric',
         ]);
+
+
+        $cat = Cat::where($validated)
+            ->first();
+
+        if($cat){
+            return abort(403, "Faild to create record! Cat with same features already exists!");
+        }
 
 
         $cat = Cat::create($validated);
@@ -228,26 +212,52 @@ class CatController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Cat  $cat
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Cat $cat)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      *
      * @param  \App\Http\Requests\UpdateCatRequest  $request
      * @param  \App\Models\Cat  $cat
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateCatRequest $request, Cat $cat)
+    public function update(Request $request, $id)
     {
-        //
+        $cat = Cat::find($id);
+        
+        if(!$cat){
+            return abort(403, "Record not found!!");
+        }
+
+        $validated = $request->validate([
+            'image'=> 'required|string|min:3',
+            'description'=> 'required|string|min:3',
+            'body_id'=> 'numeric',
+            'breed_id'=> 'numeric',
+            'coat_id'=> 'numeric',
+            'origin_id'=> 'numeric',
+            'pattern_id'=> 'numeric',
+            'type_id'=> 'numeric',
+        ]);
+
+        $arraykeys = array_keys($validated);
+        if(count($arraykeys) > 3){
+            $unshifted = $cat->toArray();
+            for($x=0; $x<count($arraykeys); $x++){
+                if($arraykeys[$x] != 'image' || $arraykeys[$x] != 'description'){
+
+                    $unshifted[$arraykeys[$x]] = $validated[$arraykeys[$x]];
+                }
+            }
+
+            $check = Cat::where(Arr::except($unshifted,['id', 'image', 'description', 'created_at', 'updated_at']))->first();
+            if($check && $check->id != $cat->id){
+                abort(403, "Cat with saame features already exists");
+            }
+        }
+
+        
+
+
+        $cat->update($validated);
+        return $cat;
     }
 
     /**
@@ -256,8 +266,15 @@ class CatController extends Controller
      * @param  \App\Models\Cat  $cat
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Cat $cat)
+    public function destroy($id)
     {
-        //
+        $cat = Cat::find($id);
+        
+        if(!$cat){
+            return abort(403, "Record not found!!");
+        }
+
+        return $cat->delete();
+        
     }
 }

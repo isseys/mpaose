@@ -59,26 +59,25 @@ class BodyController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Body  $body
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Body $body)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      *
      * @param  \App\Http\Requests\UpdateBodyRequest  $request
      * @param  \App\Models\Body  $body
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateBodyRequest $request, Body $body)
+    public function update(Request $request, $id)
     {
-        //
+        $body = Body::find($id);
+        
+        if(!$body){
+            return abort(403, "Record not found!!");
+        }
+
+        $validated = $request->validate([
+            'name'=> 'required|string|min:3|unique:bodies,name,'.$body->id
+        ]);
+
+        return $body->update($validated);
     }
 
     /**
@@ -87,8 +86,20 @@ class BodyController extends Controller
      * @param  \App\Models\Body  $body
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Body $body)
+    public function destroy($id)
     {
-        //
+        $body = Body::find($id);
+        if(!$body){
+            return abort(403, "Record not found!!");
+        }
+
+        if($body->cats()->exists()){
+            return abort(403, "Can not delete! There are cats with this category!");
+        }
+
+        
+        
+
+        return $body->delete();
     }
 }
